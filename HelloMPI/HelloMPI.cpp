@@ -1,18 +1,44 @@
 #include <stdio.h>
 #include "mpi.h"
-#define N 4
+#include <cstdlib>
+#define N 8
+#define S1Const 15
 
-using namespace std;
+int main(int argc, char** argv) {
+	int rank;
+	int size;
 
-int main(int* argc, char** argv) {
-	int numtasks, rank;
+	int A[N];
+	int B[N];
+	int C[N];
+	int Y[N];
+	int S1 = S1Const;
 
-	MPI_Init(argc, &argv);
+	srand(12);
 
+	MPI_Status;
+
+	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-	printf("Hello MPI from process = %d, total number of processes: %d\n", rank, numtasks);
+	printf("Rank = %d; Size = %d;\n", rank, size);
+
+	for (int i = 0; i < N; i++) {
+		A[i] = rand() % 2001;
+		B[i] = rand() % 2001;
+		C[i] = rand() % 2001;
+	}
+	
+
+	for (int i = 0; i < N; i++)
+		Y[i] = A[i] * S1 + C[i] / (A[i] + B[i]);
+
+	// Yi = Ai * S1 + Ci/(Ai+Bi)
+	printf("Y = [");
+	for (int i = 0; i < N; i++)
+		printf("%d ", Y[i]);
+	printf("]\n");
 
 	MPI_Finalize();
 }
