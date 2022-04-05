@@ -3,7 +3,7 @@
 #include "mpi.h"
 
 #define N 32768
-#define S1Const 15
+#define S1Const 1567.013123
 
 int main(int argc, char** argv) {
 
