@@ -1,12 +1,10 @@
 #include <stdio.h>
-#include "mpi.h"
 #include <cstdlib>
+
 #define N 8
 #define S1Const 15
 
 int main(int argc, char** argv) {
-	int rank;
-	int size;
 
 	int A[N];
 	int B[N];
@@ -16,29 +14,20 @@ int main(int argc, char** argv) {
 
 	srand(12);
 
-	MPI_Status;
-
-	MPI_Init(&argc, &argv);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-	printf("Rank = %d; Size = %d;\n", rank, size);
-
+	// Ввод случайных цифр от 0 до 2000 
 	for (int i = 0; i < N; i++) {
 		A[i] = rand() % 2001;
 		B[i] = rand() % 2001;
 		C[i] = rand() % 2001;
 	}
 	
-
+	// Yi = Ai * S1 + Ci/(Ai+Bi)
 	for (int i = 0; i < N; i++)
 		Y[i] = A[i] * S1 + C[i] / (A[i] + B[i]);
 
-	// Yi = Ai * S1 + Ci/(Ai+Bi)
+	// Вывод
 	printf("Y = [");
 	for (int i = 0; i < N; i++)
 		printf("%d ", Y[i]);
 	printf("]\n");
-
-	MPI_Finalize();
 }
