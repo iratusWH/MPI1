@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include "mpi.h"
 
-#define N 8
+#define N 32768
 #define S1Const 15
 
 int main(int argc, char** argv) {
@@ -21,53 +21,59 @@ int main(int argc, char** argv) {
 
 	srand(12);
 
+	printf("Rank: %d\n", rank);
+
 	if (rank == 0) {
-		printf("Rank: %d\n", rank);
+		
 		// input random nums from 0 to 2000 
 		for (int i = 0; i < N; i++) {
 			A[i] = rand() % 2001;
-			B[i] = rand() % 2001;
-			C[i] = rand() % 2001;
+			B[i] = i * 250;
+			C[i] = i * 150;
 		}
-
-			startTime = MPI_Wtime();
+		startTime = MPI_Wtime();
+		for (int cycles = 0; cycles < 10000; cycles++) {
 			for (int i = 1; i < size; i++) {
-				MPI_Send(&A[N * i / size], N / size, MPI_INTEGER, i, 0, MPI_COMM_WORLD);
-				MPI_Send(&B[N * i / size], N / size, MPI_INTEGER, i, 1, MPI_COMM_WORLD);
-				MPI_Send(&C[N * i / size], N / size, MPI_INTEGER, i, 2, MPI_COMM_WORLD);
+				MPI_Send(&A[(int)i * N / size], (int)N / size,
+					MPI_INT, i, 0, MPI_COMM_WORLD);
+				
 			}
 
-			for (int i = N * rank / size; i < (N * (rank + 1) / size) - 1; i++)
+			for (int i = 0; i < N / size; i++)
 				Y[i] = A[i] * S1 + C[i] / (A[i] + B[i]);
 
-			for (int i = 0; i < size; i++) {
-				MPI_Recv(&Y[N * i / size], N / size, MPI_INTEGER, i, 0, MPI_COMM_WORLD, &stat);
+			for (int i = 1; i < size; i++) {
+				MPI_Recv(&Y[(int)N * i / size], (int)N / size, 
+					MPI_INT, i, 0, MPI_COMM_WORLD, &stat);
 			}
+		}
 		endTime = MPI_Wtime();
 
 		// output
-		printf("Y = [");
+		/*printf("Y = [");
 		for (int i = 0; i < N; i++)
 			printf("%d ", Y[i]);
-		printf("]\n");
+		printf("]\n");*/
 
-
-	}
-	else {
-		printf("Rank: %d\n", rank);
+		printf("TIME=%f\n", endTime - startTime);
+	} else {
 		//[N * rank / size, N * (rank + 1)/size - 1]
 		// computing
 		// Yi = Ai * S1 + Ci/(Ai+Bi)
-			MPI_Recv(&A[N * rank / size], N / size, MPI_INTEGER, rank, 0, MPI_COMM_WORLD, &stat);
-			MPI_Recv(&B[N * rank / size], N / size, MPI_INTEGER, rank, 1, MPI_COMM_WORLD, &stat);
-			MPI_Recv(&C[N * rank / size], N / size, MPI_INTEGER, rank, 2, MPI_COMM_WORLD, &stat);
+		for (int i = 0; i < N; i++) {
+			B[i] = i * 250;
+			C[i] = i * 150;
+		}
 
-			for (int i = N * rank / size; i < (N * (rank + 1) / size) - 1; i++)
+		for (int cycles = 0; cycles < 10000; cycles++) {
+			MPI_Recv(&A[(int)N * rank / size], (int)N / size, MPI_INT, 0, 0, MPI_COMM_WORLD, &stat);
+
+			for (int i = N * rank / size; i < N * (rank + 1) / size; i++)
 				Y[i] = A[i] * S1 + C[i] / (A[i] + B[i]);
 
-			MPI_Send(&Y[N * rank / size], N / size, MPI_INTEGER, rank, 0, MPI_COMM_WORLD);
-	
+			MPI_Send(&Y[(int)N * rank / size], (int)N / size, MPI_INTEGER, 0, 0, MPI_COMM_WORLD);
+		}
 	}
 
-	MPI_Finalize;
+	MPI_Finalize();
 }
